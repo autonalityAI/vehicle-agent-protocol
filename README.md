@@ -87,6 +87,9 @@ This specification defines a message structure and communication conventions for
   }
 }
 ```
+## 📚 Full Message Specification
+
+See the [detailed key and message documentation](docs/message-spec.md) for field definitions, optional values, and valid extensions.
 
 ---
 
