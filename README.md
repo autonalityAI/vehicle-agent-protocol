@@ -305,7 +305,7 @@ You are encouraged to propose more types through GitHub Issues or Pull Requests.
 
 - Use `custom_` prefixes for any new fields.
 - Agents must ignore unknown fields to remain forward-compatible.
-- Validate messages using the official schema: [`schema/VAP-message-schema.json`](../schema/VAP-message-schema.json)
+- Validate messages using the official schema: [`schema/vap-message-schema.json`](../schema/vap-message-schema.json)
 
 ---
 
