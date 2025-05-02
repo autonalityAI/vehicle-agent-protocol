@@ -314,3 +314,8 @@ python validate_message.py examples/query.json
 This specification is open and evolving.  
 Submit ideas, issues, or PRs at: [https://github.com/autonalityAI/vehicle-agent-standard](https://github.com/autonalityAI/vehicle-agent-standard)
 
+---
+
+## 9. 📄 Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for a list of releases and updates to the standard.
