@@ -1,10 +1,10 @@
-# Vehicle Agent Standard (VAS)
+# Vehicle Agent Protocol (VAP)
 
-**Vehicle Agent Standard (VAS)** is an open protocol for communication between intelligent software agents operating in or around vehicles.
+**Vehicle Agent Protocol (VAP)** is an open protocol for communication between intelligent software agents operating in or around vehicles.
 
 It provides a common message format for exchanging information such as events, recommendations, queries and alerts — allowing vehicles, fleets, and backend systems to interact in a structured, decentralized and vendor-agnostic way (i.e. not tied to any specific brand or platform).
 
-VAS is designed to support both closed systems and open networks of agents, enabling new forms of vehicle collaboration, predictive maintenance, and shared knowledge between connected actors.
+VAP is designed to support both closed systems and open networks of agents, enabling new forms of vehicle collaboration, predictive maintenance, and shared knowledge between connected actors.
 
 
 ---
@@ -132,16 +132,16 @@ Feel free to fork this repo, open an issue, or submit a pull request.
 
 Created and maintained by [autonality.ai](https://autonality.ai)  
 For questions, suggestions or collaborations, contact: **echacon911@gmail.com**
-# Vehicle Agent Standard – Message Specification
+# Vehicle Agent Protocol – Message Specification
 
-This document provides a detailed specification of the message structure used in the Vehicle Agent Standard (VAS).  
+This document provides a detailed specification of the message structure used in the Vehicle Agent Protocol (VAP).  
 It defines the required and optional fields, valid types, and how to extend the standard in a structured way.
 
 ---
 
 ## 1. 📦 Message Overview
 
-All VAS messages are JSON objects with a standard set of top-level fields and an optional nested payload, depending on the message type.
+All VAP messages are JSON objects with a standard set of top-level fields and an optional nested payload, depending on the message type.
 
 ---
 
@@ -305,7 +305,7 @@ You are encouraged to propose more types through GitHub Issues or Pull Requests.
 
 - Use `custom_` prefixes for any new fields.
 - Agents must ignore unknown fields to remain forward-compatible.
-- Validate messages using the official schema: [`schema/vas-message-schema.json`](../schema/vas-message-schema.json)
+- Validate messages using the official schema: [`schema/VAP-message-schema.json`](../schema/VAP-message-schema.json)
 
 ---
 
