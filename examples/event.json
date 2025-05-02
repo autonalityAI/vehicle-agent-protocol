@@ -1,0 +1,17 @@
+{
+  "message_type": "event",
+  "sender_id": "vehicle:ABC123",
+  "receiver_id": "system:autonality.ai",
+  "timestamp": "2025-05-02T18:32:00Z",
+  "event": {
+    "name": "engine_noise_detected",
+    "severity": "medium",
+    "location": "engine_bay",
+    "confidence": 0.87
+  },
+  "metadata": {
+    "vehicle_model": "Toyota Corolla 2021",
+    "agent_version": "1.2.4",
+    "language": "en-US"
+  }
+}
