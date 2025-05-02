@@ -1,7 +1,11 @@
 # Vehicle Agent Standard (VAS)
 
-**Vehicle Agent Standard (VAS)** is an open communication protocol designed for intelligent agents embedded in vehicles.  
-It defines how vehicles, fleets, and backend systems exchange structured, machine-readable messages — enabling interoperability, decentralized reasoning, and future autonomous collaboration between agents.
+**Vehicle Agent Standard (VAS)** is an open protocol for communication between intelligent software agents operating in or around vehicles.
+
+It provides a common message format for exchanging information such as events, recommendations, queries and alerts — allowing vehicles, fleets, and backend systems to interact in a structured, decentralized and vendor-agnostic way (i.e. not tied to any specific brand or platform).
+
+VAS is designed to support both closed systems and open networks of agents, enabling new forms of vehicle collaboration, predictive maintenance, and shared knowledge between connected actors.
+
 
 ---
 
