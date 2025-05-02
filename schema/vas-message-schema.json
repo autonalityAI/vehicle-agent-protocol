@@ -1,0 +1,67 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Vehicle Agent Message",
+  "type": "object",
+  "required": ["message_type", "sender_id", "receiver_id", "timestamp"],
+  "properties": {
+    "message_id": {
+      "type": "string"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "sender_id": {
+      "type": "string",
+      "pattern": "^(vehicle|fleet|user|system):[A-Za-z0-9_.-]+$"
+    },
+    "receiver_id": {
+      "type": "string",
+      "pattern": "^(vehicle|fleet|user|system):[A-Za-z0-9_.-]+$"
+    },
+    "message_type": {
+      "type": "string",
+      "enum": ["event", "query", "response", "sync_state", "notification"]
+    },
+    "event": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string" },
+        "severity": { "type": "string", "enum": ["low", "medium", "high"] },
+        "location": { "type": "string" },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+      },
+      "additionalProperties": true
+    },
+    "query": {
+      "type": "object",
+      "required": ["type", "topic"],
+      "properties": {
+        "type": { "type": "string" },
+        "topic": { "type": "string" },
+        "location": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "response": {
+      "type": "object",
+      "required": ["type", "data"],
+      "properties": {
+        "type": { "type": "string" },
+        "data": { "type": "object" }
+      },
+      "additionalProperties": true
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "vehicle_model": { "type": "string" },
+        "agent_version": { "type": "string" },
+        "language": { "type": "string" }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false
+}
