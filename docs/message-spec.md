@@ -1,13 +1,13 @@
-# Vehicle Agent Standard – Message Specification
+# Vehicle Agent Protocol – Message Specification
 
-This document provides a detailed specification of the message structure used in the Vehicle Agent Standard (VAS).  
+This document provides a detailed specification of the message structure used in the Vehicle Agent Protocol (VAP).  
 It defines the required and optional fields, valid types, and how to extend the standard in a structured way.
 
 ---
 
 ## 1. 📦 Message Overview
 
-All VAS messages are JSON objects with a standard set of top-level fields and an optional nested payload, depending on the message type.
+All VAP messages are JSON objects with a standard set of top-level fields and an optional nested payload, depending on the message type.
 
 ---
 
@@ -148,7 +148,7 @@ This table lists common supported query types. Extend freely.
 
 - Use `custom_` prefixes for custom fields
 - Ignore unknown fields by default (agents must be tolerant)
-- Use [`schema/vas-message-schema.json`](../schema/vas-message-schema.json) for validation
+- Use [`schema/vap-message-schema.json`](../schema/vap-message-schema.json) for validation
 
 ---
 
