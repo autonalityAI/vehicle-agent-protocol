@@ -1,87 +1,168 @@
----
+# Vehicle Agent Standard – Message Specification
 
-## 🔍 Message Key Reference
-
-This section provides a detailed explanation of the keys used in the message structure defined by the Vehicle Agent Standard (VAS).
-
----
-
-### 🔑 Common Top-Level Keys
-
-| Key           | Type     | Required | Description                                                                 |
-|---------------|----------|----------|-----------------------------------------------------------------------------|
-| `message_id`  | string   | No       | Unique ID of the message (UUID or short ID). Useful for logging/tracking. |
-| `timestamp`   | string   | Yes      | ISO 8601 timestamp of when the message was generated.                      |
-| `sender_id`   | string   | Yes      | Unique agent ID that sends the message. Format: `vehicle:X`, `fleet:Y`, etc. |
-| `receiver_id` | string   | Yes      | Target agent ID. Can be another vehicle, a fleet, a user, or the system.   |
-| `message_type`| string   | Yes      | Type of the message: `event`, `query`, `response`, etc.                    |
+This document provides a detailed specification of the message structure used in the Vehicle Agent Standard (VAS).  
+It defines the required and optional fields, valid types, and how to extend the standard in a structured way.
 
 ---
 
-### 🧩 `event` Object
+## 1. 📦 Message Overview
+
+All VAS messages are JSON objects with a standard set of top-level fields and an optional nested payload, depending on the message type.
+
+---
+
+## 2. 🔑 Top-Level Fields
+
+| Key            | Type     | Required | Description                                                                 |
+|----------------|----------|----------|-----------------------------------------------------------------------------|
+| `message_id`   | string   | No       | Unique ID of the message (e.g., UUID or internal ref).                     |
+| `timestamp`    | string   | Yes      | ISO 8601 format datetime when the message was generated.                   |
+| `sender_id`    | string   | Yes      | Unique ID of the agent sending the message. Format: `vehicle:X`, `fleet:Y`, etc. |
+| `receiver_id`  | string   | Yes      | ID of the target agent. Can be another vehicle, fleet, user, or system.    |
+| `message_type` | string   | Yes      | One of: `event`, `query`, `response`, `sync_state`, `notification`.        |
+
+---
+
+## 3. 🧩 Message Type Definitions
+
+### 3.1 `event`
 
 Used when an agent reports a detected condition or signal.
 
-| Key         | Type     | Required | Description                                                |
-|-------------|----------|----------|------------------------------------------------------------|
-| `name`      | string   | Yes      | Identifier of the event (e.g., `engine_noise_detected`)    |
-| `severity`  | string   | No       | Event importance: `low`, `medium`, `high`                  |
-| `location`  | string   | No       | Where the event occurred (e.g., `engine_bay`)              |
-| `confidence`| number   | No       | Confidence score (0–1) about the accuracy of the event     |
+```json
+"event": {
+  "name": "engine_noise_detected",
+  "severity": "medium",
+  "location": "engine_bay",
+  "confidence": 0.87
+}
+```
+
+| Field       | Type     | Required | Description                                       |
+|-------------|----------|----------|---------------------------------------------------|
+| `name`      | string   | Yes      | Event identifier (e.g., `brake_pad_wear`)         |
+| `severity`  | string   | No       | `low`, `medium`, `high`                           |
+| `location`  | string   | No       | Physical or logical location                      |
+| `confidence`| number   | No       | Value from 0.0 to 1.0                             |
 
 ---
 
-### ❓ `query` Object
+### 3.2 `query`
 
-Used when an agent wants to ask another agent for a recommendation, data or state.
+Used when an agent requests information, suggestions, or status.
 
-| Key         | Type     | Required | Description                                                      |
-|-------------|----------|----------|------------------------------------------------------------------|
-| `type`      | string   | Yes      | Purpose of the query (`recommendation`, `data_request`, etc.)    |
-| `topic`     | string   | Yes      | What the query is about (`maintenance_shop`, `battery_status`)   |
-| `location`  | string   | No       | Optional: geographic scope for the query                         |
+```json
+"query": {
+  "type": "recommendation",
+  "topic": "maintenance_shop",
+  "location": "Zaragoza"
+}
+```
+
+| Field      | Type     | Required | Description                                            |
+|------------|----------|----------|--------------------------------------------------------|
+| `type`     | string   | Yes      | `recommendation`, `data_request`, `fleet_status`, etc.|
+| `topic`    | string   | Yes      | The subject of the query                              |
+| `location` | string   | No       | Optional context                                       |
 
 ---
 
-### ✅ `response` Object
+### 3.3 `response`
 
-Used to respond to a `query`.
+Used to return data in response to a query.
 
-| Key     | Type     | Required | Description                                  |
+```json
+"response": {
+  "type": "recommendation",
+  "data": {
+    "name": "Bosch Service Zaragoza",
+    "rating": 4.7,
+    "last_used": "2024-12-10"
+  }
+}
+```
+
+| Field   | Type     | Required | Description                                  |
 |---------|----------|----------|----------------------------------------------|
-| `type`  | string   | Yes      | Matches the type from the original query     |
-| `data`  | object   | Yes      | The actual response content                  |
+| `type`  | string   | Yes      | Must match the original query’s `type`       |
+| `data`  | object   | Yes      | Payload with the response                    |
 
 ---
 
-### ℹ️ `metadata` Object
+## 4. ℹ️ `metadata` Object
 
-Optional object to describe the context in which the message was generated.
+Provides contextual information about the sending agent.
 
-| Key             | Type     | Description                          |
-|------------------|----------|--------------------------------------|
-| `vehicle_model`  | string   | e.g., `Hyundai Ioniq 5 2023`         |
-| `agent_version`  | string   | e.g., `1.2.4`                        |
-| `language`       | string   | ISO language code (e.g., `en-US`)    |
+```json
+"metadata": {
+  "vehicle_model": "Hyundai Ioniq 5",
+  "agent_version": "1.2.4",
+  "language": "en-US"
+}
+```
 
----
-
-## 📚 Supported Query Types (Proposal)
-
-You are encouraged to extend this list depending on your implementation.
-
-| Query Type         | Description                                                |
-|--------------------|------------------------------------------------------------|
-| `recommendation`   | Ask for advice based on another agent's experience         |
-| `data_request`     | Request specific metrics or state from another agent       |
-| `vehicle_identity` | Query another agent to identify itself                     |
-| `proximity_alert`  | Ask which vehicles are nearby                              |
-| `fleet_status`     | Request summary from a fleet agent                         |
+| Field           | Type     | Description                                |
+|------------------|----------|--------------------------------------------|
+| `vehicle_model`  | string   | e.g., `Toyota Corolla 2021`                |
+| `agent_version`  | string   | e.g., `1.3.2`                              |
+| `language`       | string   | Language code (e.g., `en-US`, `es-ES`)     |
 
 ---
 
-## 🛠️ Extensibility
+### 4.1 🌍 About `language` and Multilingual Support
 
-All keys not marked as "required" are optional and may be omitted.  
-Custom fields can be added in `metadata` or in nested structures if needed — ideally using prefixes (e.g., `custom_`) to avoid conflicts.
+The `metadata.language` field specifies the preferred language for human-facing communication.
 
+#### ✅ Keys and Values Stay in English
+
+Even when `language` is `es-ES` or another non-English value, all **field names and enum values remain in English**. This ensures:
+
+- Global interoperability
+- Stable validation against schemas
+- Avoiding ambiguity in parsing
+
+| Element            | Language   | Example                       |
+|--------------------|------------|-------------------------------|
+| Keys / field names | English    | `event`, `query.topic`, etc.  |
+| Enum values        | English    | `"brake_pad_wear"`, `"high"`  |
+| Language metadata  | Any valid  | `"language": "es-ES"`         |
+| Generated output   | User's lang| Response in Spanish, if needed|
+
+---
+
+## 5. 📚 Supported `query.type` Values
+
+This table lists common supported query types. Extend freely.
+
+| Type              | Description                                               |
+|-------------------|-----------------------------------------------------------|
+| `recommendation`  | Ask for suggestions based on experience                   |
+| `data_request`    | Request technical/vehicle data                            |
+| `fleet_status`    | Ask for status summary from a fleet agent                 |
+| `vehicle_identity`| Ask for metadata about another vehicle                    |
+| `proximity_alert` | Ask for nearby agents                                     |
+
+---
+
+## 6. ⚙️ Extending the Standard
+
+- Use `custom_` prefixes for custom fields
+- Ignore unknown fields by default (agents must be tolerant)
+- Use [`schema/vas-message-schema.json`](../schema/vas-message-schema.json) for validation
+
+---
+
+## 7. 🧪 Message Validation
+
+Use the included Python script:
+
+```bash
+python validate_message.py examples/query.json
+```
+
+---
+
+## 8. 📬 Feedback & Contributions
+
+The standard is open and community-driven.  
+Open an issue or PR at: [https://github.com/autonalityAI/vehicle-agent-standard](https://github.com/autonalityAI/vehicle-agent-standard)
