@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to the Vehicle Agent Standard will be documented in this file.
+All notable changes to the Vehicle Agent Protocol will be documented in this file.
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
@@ -10,7 +10,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Added
 
-- Initial public release of the Vehicle Agent Standard (VAS).
+- Initial public release of the Vehicle Agent Protocol (VAP).
 - Defined top-level message structure and metadata.
 - Supported `message_type`: `event`, `query`, `response`.
 - Reserved `message_type`: `sync_state`, `notification`.
