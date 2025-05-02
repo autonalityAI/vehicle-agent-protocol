@@ -13,6 +13,12 @@ It defines how vehicles, fleets, and backend systems exchange structured, machin
 
 ---
 
+## 🛰️ Transport mechanisms
+
+(MQTT, WebSocket, REST) are currently under review — see [docs/transport.md](docs/transport.md)
+
+---
+
 ## 📦 Basic Message Structure
 
 ```json
