@@ -3,7 +3,7 @@ import sys
 from jsonschema import validate, ValidationError, SchemaError
 
 # Rutas por defecto
-SCHEMA_FILE = "schema/vas-message-schema.json"
+SCHEMA_FILE = "schema/vap-message-schema.json"
 
 def main(json_file_path):
     try:
