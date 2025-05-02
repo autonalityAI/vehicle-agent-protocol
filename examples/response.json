@@ -1,0 +1,14 @@
+{
+  "message_type": "response",
+  "sender_id": "vehicle:XYZ987",
+  "receiver_id": "vehicle:ABC123",
+  "timestamp": "2025-05-02T17:01:12Z",
+  "response": {
+    "type": "recommendation",
+    "data": {
+      "name": "Bosch Service Zaragoza",
+      "rating": 4.7,
+      "last_used": "2024-12-10"
+    }
+  }
+}
