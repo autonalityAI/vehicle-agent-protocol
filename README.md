@@ -1,8 +1,7 @@
 # Vehicle Agent Standard (VAS)
 
-**An open protocol for communication between vehicle agents.**
-
-This specification defines a message structure and communication conventions for intelligent agents (LLMs, connected systems, embedded software) to exchange useful information between vehicles, fleets, and platforms.
+**Vehicle Agent Standard (VAS)** is an open communication protocol designed for intelligent agents embedded in vehicles.  
+It defines how vehicles, fleets, and backend systems exchange structured, machine-readable messages — enabling interoperability, decentralized reasoning, and future autonomous collaboration between agents.
 
 ---
 
@@ -51,6 +50,12 @@ This specification defines a message structure and communication conventions for
 
 ---
 
+## 📚 Full Message Specification
+
+See the [detailed key and message documentation](docs/message-spec.md) for field definitions, optional values, and valid extensions.
+
+---
+
 ## 🧾 Example: Query and Response Between Agents
 
 ### 1. `query`: Request for a recommended workshop in Zaragoza
@@ -87,10 +92,6 @@ This specification defines a message structure and communication conventions for
   }
 }
 ```
-## 📚 Full Message Specification
-
-See the [detailed key and message documentation](docs/message-spec.md) for field definitions, optional values, and valid extensions.
-
 ---
 
 ## 🔐 Agent Identifier Format
@@ -106,7 +107,7 @@ See the [detailed key and message documentation](docs/message-spec.md) for field
 
 ## 📘 License
 
-This project is available under the [MIT License](LICENSE) to encourage open usage and community contributions.
+This project is licensed under the [MIT License](LICENSE), which permits open use, modification, and distribution with attribution.
 
 ---
 
@@ -120,4 +121,196 @@ Feel free to fork this repo, open an issue, or submit a pull request.
 ## 📬 Contact
 
 Created and maintained by [autonality.ai](https://autonality.ai)  
-To collaborate, reach out to: **echacon911@gmail.com**
+For questions, suggestions or collaborations, contact: **echacon911@gmail.com**
+# Vehicle Agent Standard – Message Specification
+
+This document provides a detailed specification of the message structure used in the Vehicle Agent Standard (VAS).  
+It defines the required and optional fields, valid types, and how to extend the standard in a structured way.
+
+---
+
+## 1. 📦 Message Overview
+
+All VAS messages are JSON objects with a standard set of top-level fields and an optional nested payload, depending on the message type.
+
+---
+
+## 2. 🔑 Top-Level Fields
+
+| Key            | Type     | Required | Description                                                                 |
+|----------------|----------|----------|-----------------------------------------------------------------------------|
+| `message_id`   | string   | No       | Unique ID of the message (e.g., UUID or internal ref).                     |
+| `timestamp`    | string   | Yes      | ISO 8601 format datetime when the message was generated.                   |
+| `sender_id`    | string   | Yes      | Unique ID of the agent sending the message. Format: `vehicle:X`, `fleet:Y`, etc. |
+| `receiver_id`  | string   | Yes      | ID of the target agent. Can be another vehicle, fleet, user, or system.    |
+| `message_type` | string   | Yes      | One of: `event`, `query`, `response`, `sync_state`, `notification`.        |
+
+---
+
+## 3. 🧩 Message Type Definitions
+
+### 3.1 `event`
+
+Used when an agent reports a detected condition or signal.
+
+```json
+"event": {
+  "name": "engine_noise_detected",
+  "severity": "medium",
+  "location": "engine_bay",
+  "confidence": 0.87
+}
+```
+
+| Field       | Type     | Required | Description                                       |
+|-------------|----------|----------|---------------------------------------------------|
+| `name`      | string   | Yes      | Event identifier (e.g., `brake_pad_wear`)         |
+| `severity`  | string   | No       | `low`, `medium`, `high`                           |
+| `location`  | string   | No       | Physical or logical location                      |
+| `confidence`| number   | No       | Value from 0.0 to 1.0                             |
+
+---
+
+### 3.2 `query`
+
+Used when an agent requests information, suggestions, or status.
+
+```json
+"query": {
+  "type": "recommendation",
+  "topic": "maintenance_shop",
+  "location": "Zaragoza"
+}
+```
+
+| Field      | Type     | Required | Description                                            |
+|------------|----------|----------|--------------------------------------------------------|
+| `type`     | string   | Yes      | `recommendation`, `data_request`, `fleet_status`, etc.|
+| `topic`    | string   | Yes      | The subject of the query                              |
+| `location` | string   | No       | Optional context                                       |
+
+---
+
+### 3.3 `response`
+
+Used to return data in response to a query.
+
+```json
+"response": {
+  "type": "recommendation",
+  "data": {
+    "name": "Bosch Service Zaragoza",
+    "rating": 4.7,
+    "last_used": "2024-12-10"
+  }
+}
+```
+
+| Field   | Type     | Required | Description                                  |
+|---------|----------|----------|----------------------------------------------|
+| `type`  | string   | Yes      | Must match the original query’s `type`       |
+| `data`  | object   | Yes      | Payload with the response                    |
+
+---
+
+### 3.4 `sync_state` (reserved)
+
+This message type is **reserved for future use**, such as:
+- Sharing a vehicle's current state with a fleet backend.
+- Broadcasting contextual state to nearby agents.
+
+Structure to be defined in a future version.
+
+---
+
+### 3.5 `notification` (reserved)
+
+This message type is **intended for system-wide notifications** or status messages not directed to any specific agent.
+
+Examples (future use):
+- Service downtime alert
+- Protocol version update
+- Public safety broadcast
+
+Structure to be defined in a future version.
+
+---
+
+## 4. ℹ️ `metadata` Object
+
+Provides contextual information about the sending agent.
+
+```json
+"metadata": {
+  "vehicle_model": "Hyundai Ioniq 5",
+  "agent_version": "1.2.4",
+  "language": "es-ES"
+}
+```
+
+| Field           | Type     | Description                                |
+|------------------|----------|--------------------------------------------|
+| `vehicle_model`  | string   | e.g., `Toyota Corolla 2021`                |
+| `agent_version`  | string   | e.g., `1.3.2`                              |
+| `language`       | string   | Language code (e.g., `en-US`, `es-ES`)     |
+
+---
+
+### 4.1 🌍 About `language` and Multilingual Support
+
+The `metadata.language` field specifies the preferred language for human-facing communication.
+
+#### ✅ Keys and Values Stay in English
+
+Even when `language` is `es-ES` or another non-English value, all **field names and enum values remain in English**. This ensures:
+
+- Global interoperability
+- Stable validation against schemas
+- Avoiding ambiguity in parsing
+
+| Element            | Language   | Example                       |
+|--------------------|------------|-------------------------------|
+| Keys / field names | English    | `event`, `query.topic`, etc.  |
+| Enum values        | English    | `"brake_pad_wear"`, `"high"`  |
+| Language metadata  | Any valid  | `"language": "es-ES"`         |
+| Generated output   | User's lang| Response in Spanish, if needed|
+
+---
+
+## 5. 📚 Supported `query.type` Values
+
+| Type              | Description                                               |
+|-------------------|-----------------------------------------------------------|
+| `recommendation`  | Ask for suggestions based on experience                   |
+| `data_request`    | Request technical/vehicle data                            |
+| `fleet_status`    | Ask for status summary from a fleet agent                 |
+| `vehicle_identity`| Ask for metadata about another vehicle                    |
+| `proximity_alert` | Ask for nearby agents                                     |
+
+You are encouraged to propose more types through GitHub Issues or Pull Requests.
+
+---
+
+## 6. ⚙️ Extending the Standard
+
+- Use `custom_` prefixes for any new fields.
+- Agents must ignore unknown fields to remain forward-compatible.
+- Validate messages using the official schema: [`schema/vas-message-schema.json`](../schema/vas-message-schema.json)
+
+---
+
+## 7. 🧪 Message Validation
+
+Use the provided Python script to validate example messages:
+
+```bash
+python validate_message.py examples/query.json
+```
+
+---
+
+## 8. 📬 Feedback & Contributions
+
+This specification is open and evolving.  
+Submit ideas, issues, or PRs at: [https://github.com/autonalityAI/vehicle-agent-standard](https://github.com/autonalityAI/vehicle-agent-standard)
+
