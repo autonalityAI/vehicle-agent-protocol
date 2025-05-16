@@ -1,0 +1,13 @@
+{
+  "message_type": "notification",
+  "sender_id": "system:autonality.ai",
+  "receiver_id": "ALL",
+  "timestamp": "2025-05-16T11:00:00Z",
+  "notification": {
+    "type": "recall_advisory",
+    "topic": "brake_hose_inspection",
+    "models_affected": ["CUPRA Leon 2021-2022", "Golf 8 2020-2021"],
+    "source": "official_bulletin_132/2025",
+    "note": "Early signs detected by 17 agents. Recommended to inspect before summer."
+  }
+}
