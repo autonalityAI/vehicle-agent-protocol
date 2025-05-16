@@ -1,8 +1,9 @@
 import json
 import sys
 from jsonschema import validate, ValidationError, SchemaError
+from jsonschema.exceptions import best_match
 
-# Rutas por defecto
+# Ruta del esquema
 SCHEMA_FILE = "schema/vap-message-schema.json"
 
 def main(json_file_path):
@@ -14,10 +15,14 @@ def main(json_file_path):
 
         validate(instance=data, schema=schema)
         print(f"✅ {json_file_path} is valid ✅")
+
     except FileNotFoundError:
         print("❌ File not found. Check the path.")
     except ValidationError as ve:
         print(f"❌ Validation error: {ve.message}")
+        print(f"   ↳ Path: {' → '.join(map(str, ve.absolute_path))}")
+        if ve.cause:
+            print(f"   Cause: {ve.cause}")
     except SchemaError as se:
         print(f"❌ Schema error: {se.message}")
     except Exception as e:
