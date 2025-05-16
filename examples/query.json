@@ -2,10 +2,14 @@
   "message_type": "query",
   "sender_id": "vehicle:ABC123",
   "receiver_id": "vehicle:XYZ987",
-  "timestamp": "2025-05-02T17:00:00Z",
+  "timestamp": "2025-05-16T09:00:00Z",
   "query": {
     "type": "recommendation",
     "topic": "maintenance_shop",
-    "location": "Zaragoza"
+    "location": "Zaragoza",
+    "context": {
+      "issue": "brake_pad_wear",
+      "urgency": "high"
+    }
   }
 }
