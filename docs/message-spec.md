@@ -6,7 +6,7 @@ This document provides a detailed specification of the message structure used in
 
 ## 1. 📦 Message Overview
 
-All VAP messages are JSON objects with a standard set of top-level fields and an optional nested payload, depending on the `message_type`.
+All VAP messages are JSON objects with a standard set of top-level fields and a nested object, depending on the `message_type`.
 
 ---
 
@@ -31,11 +31,17 @@ Each message type must include one nested object with a name matching the `messa
 Used when an agent reports a detected condition or signal.
 
 ```json
-"event": {
-  "name": "engine_noise_detected",
-  "severity": "medium",
-  "location": "engine_bay",
-  "confidence": 0.87
+{
+  "message_type": "event",
+  "sender_id": "vehicle:XYZ123",
+  "receiver_id": "fleet:FLEET456",
+  "timestamp": "2025-05-16T11:00:00Z",
+  "event": {
+    "name": "engine_noise_detected",
+    "severity": "medium",
+    "location": "engine_bay",
+    "confidence": 0.87
+  }
 }
 ```
 
@@ -44,11 +50,17 @@ Used when an agent reports a detected condition or signal.
 Used when an agent requests information, suggestions, or status.
 
 ```json
-"query": {
-  "type": "recommendation",
-  "topic": "maintenance_shop",
-  "location": "Zaragoza",
-  "context": "Clutch slipping when going uphill. Owner says it smells like toast."
+{
+  "message_type": "query",
+  "sender_id": "vehicle:ABC123",
+  "receiver_id": "vehicle:XYZ987",
+  "timestamp": "2025-05-16T09:28:43Z",
+  "query": {
+    "type": "recommendation",
+    "topic": "maintenance_shop",
+    "location": "Zaragoza",
+    "context": "Clutch slipping when going uphill. Owner says it smells like toast."
+  }
 }
 ```
 
@@ -57,13 +69,19 @@ Used when an agent requests information, suggestions, or status.
 Used to return data in response to a query.
 
 ```json
-"response": {
-  "type": "recommendation",
-  "data": {
-    "name": "Taller Clutch&Go",
-    "rating": 4.9,
-    "last_used": "2025-04-08",
-    "note": "Fast, honest, didn’t treat my owner like a wallet on wheels."
+{
+  "message_type": "response",
+  "sender_id": "vehicle:XYZ987",
+  "receiver_id": "vehicle:ABC123",
+  "timestamp": "2025-05-16T09:29:10Z",
+  "response": {
+    "type": "recommendation",
+    "data": {
+      "name": "Taller Clutch&Go",
+      "rating": 4.9,
+      "last_used": "2025-04-08",
+      "note": "Fast, honest, didn’t treat my owner like a wallet on wheels."
+    }
   }
 }
 ```
@@ -73,27 +91,37 @@ Used to return data in response to a query.
 Used to share current state or status between a vehicle and a system (e.g., fleet backend or nearby peers).
 
 ```json
-"sync_state": {
-  "fuel_level": 36,
-  "battery_health": "good",
-  "mileage": 48720,
-  "next_inspection_due": "2025-06-30"
+{
+  "message_type": "sync_state",
+  "sender_id": "vehicle:CUP21-HYB",
+  "receiver_id": "fleet:FLEET02-ESP",
+  "timestamp": "2025-05-14T10:20:00Z",
+  "sync_state": {
+    "fuel_level": 36,
+    "battery_health": "good",
+    "mileage": 48720,
+    "next_inspection_due": "2025-06-30"
+  }
 }
 ```
-
-Fields are flexible, but must be simple key-value pairs.
 
 ### 3.5 `notification`
 
 Used for global messages or non-targeted alerts.
 
 ```json
-"notification": {
-  "type": "recall_advisory",
-  "topic": "brake_hose_inspection",
-  "models_affected": ["CUPRA Leon 2021-2022", "Golf 8 2020-2021"],
-  "source": "official_bulletin_132/2025",
-  "note": "Early signs detected by 17 agents. Recommended to inspect before summer."
+{
+  "message_type": "notification",
+  "sender_id": "system:autonality.ai",
+  "receiver_id": "ALL",
+  "timestamp": "2025-05-13T12:00:00Z",
+  "notification": {
+    "type": "recall_advisory",
+    "topic": "brake_hose_inspection",
+    "models_affected": ["CUPRA Leon 2021-2022", "Golf 8 2020-2021"],
+    "source": "official_bulletin_132/2025",
+    "note": "Early signs detected by 17 agents. Recommended to inspect before summer."
+  }
 }
 ```
 
