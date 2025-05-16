@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Vehicle Agent Message",
+  "title": "Vehicle Agent Protocol Message",
   "type": "object",
-  "required": ["message_type", "sender_id", "receiver_id", "timestamp"],
+  "required": ["message_type", "timestamp", "sender_id", "receiver_id"],
   "properties": {
     "message_id": {
       "type": "string"
@@ -23,36 +23,62 @@
       "type": "string",
       "enum": ["event", "query", "response", "sync_state", "notification"]
     },
+
     "event": {
       "type": "object",
-      "required": ["name"],
       "properties": {
         "name": { "type": "string" },
         "severity": { "type": "string", "enum": ["low", "medium", "high"] },
         "location": { "type": "string" },
         "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
       },
+      "required": ["name"],
       "additionalProperties": true
     },
+
     "query": {
       "type": "object",
-      "required": ["type", "topic"],
       "properties": {
         "type": { "type": "string" },
         "topic": { "type": "string" },
-        "location": { "type": "string" }
+        "location": { "type": "string" },
+        "context": { "type": "string" }
       },
+      "required": ["type", "topic"],
       "additionalProperties": true
     },
+
     "response": {
       "type": "object",
-      "required": ["type", "data"],
       "properties": {
         "type": { "type": "string" },
         "data": { "type": "object" }
       },
+      "required": ["type", "data"],
       "additionalProperties": true
     },
+
+    "sync_state": {
+      "type": "object",
+      "additionalProperties": { "type": ["string", "number", "boolean", "null"] }
+    },
+
+    "notification": {
+      "type": "object",
+      "properties": {
+        "type": { "type": "string" },
+        "topic": { "type": "string" },
+        "models_affected": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "source": { "type": "string" },
+        "note": { "type": "string" }
+      },
+      "required": ["type", "topic"],
+      "additionalProperties": true
+    },
+
     "metadata": {
       "type": "object",
       "properties": {
@@ -63,5 +89,12 @@
       "additionalProperties": true
     }
   },
-  "additionalProperties": false
+  "additionalProperties": false,
+  "oneOf": [
+    { "required": ["event"] },
+    { "required": ["query"] },
+    { "required": ["response"] },
+    { "required": ["sync_state"] },
+    { "required": ["notification"] }
+  ]
 }
