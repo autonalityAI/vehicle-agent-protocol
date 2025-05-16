@@ -1,11 +1,12 @@
 # Vehicle Agent Protocol (VAP)
 
+> ⚙️ Current version: **0.2.0** — May 2025
+
 **Vehicle Agent Protocol (VAP)** is an open protocol for communication between intelligent software agents operating in or around vehicles.
 
 It provides a common message format for exchanging information such as events, recommendations, queries and alerts — allowing vehicles, fleets, and backend systems to interact in a structured, decentralized and vendor-agnostic way (i.e. not tied to any specific brand or platform).
 
 VAP is designed to support both closed systems and open networks of agents, enabling new forms of vehicle collaboration, predictive maintenance, and shared knowledge between connected actors.
-
 
 ---
 
@@ -19,19 +20,22 @@ VAP is designed to support both closed systems and open networks of agents, enab
 
 ## 🛰️ Transport mechanisms
 
-(MQTT, WebSocket, REST) are currently under review — see [docs/transport.md](docs/transport.md)
+Transport layer options (e.g., MQTT, WebSocket, REST) are currently under review.
+
+The VAP message format is **transport-agnostic**, meaning it can be used over different communication channels depending on the architecture (peer-to-peer, centralized, edge-to-cloud, etc.).
+
+For updates and drafts, see: [docs/transport.md](docs/transport.md)
 
 ---
 
-## 📦 Basic Message Structure
+## 📦 Basic Message Structure (Example: `event`)
 
 ```json
 {
-  "message_id": "msg-981273",
-  "timestamp": "2025-05-02T18:32:00Z",
-  "sender_id": "vehicle:ABC123",
-  "receiver_id": "vehicle:XYZ987",
   "message_type": "event",
+  "sender_id": "vehicle:ABC123",
+  "receiver_id": "fleet:FLEET001",
+  "timestamp": "2025-05-16T08:32:00Z",
   "event": {
     "name": "engine_noise_detected",
     "severity": "medium",
@@ -60,22 +64,16 @@ VAP is designed to support both closed systems and open networks of agents, enab
 
 ---
 
-## 📚 Full Message Specification
+## 🧾 Example Messages by Type
 
-See the [detailed key and message documentation](docs/message-spec.md) for field definitions, optional values, and valid extensions.
-
----
-
-## 🧾 Example: Query and Response Between Agents
-
-### 1. `query`: Request for a recommended workshop in Zaragoza
+### `query`: Request for a recommended workshop in Zaragoza
 
 ```json
 {
   "message_type": "query",
   "sender_id": "vehicle:ABC123",
   "receiver_id": "vehicle:XYZ987",
-  "timestamp": "2025-05-02T17:00:00Z",
+  "timestamp": "2025-05-16T09:00:00Z",
   "query": {
     "type": "recommendation",
     "topic": "maintenance_shop",
@@ -84,14 +82,16 @@ See the [detailed key and message documentation](docs/message-spec.md) for field
 }
 ```
 
-### 2. `response`: Recommendation returned
+---
+
+### `response`: Recommendation returned
 
 ```json
 {
   "message_type": "response",
   "sender_id": "vehicle:XYZ987",
   "receiver_id": "vehicle:ABC123",
-  "timestamp": "2025-05-02T17:01:12Z",
+  "timestamp": "2025-05-16T09:01:12Z",
   "response": {
     "type": "recommendation",
     "data": {
@@ -102,16 +102,61 @@ See the [detailed key and message documentation](docs/message-spec.md) for field
   }
 }
 ```
+
+---
+
+### `sync_state`: Report from a vehicle to a fleet system
+
+```json
+{
+  "message_type": "sync_state",
+  "sender_id": "vehicle:CUPRA21-HYB",
+  "receiver_id": "fleet:FLEET02-ESP",
+  "timestamp": "2025-05-16T10:20:00Z",
+  "sync_state": {
+    "fuel_level": 36,
+    "battery_health": "good",
+    "mileage": 48720,
+    "next_inspection_due": "2025-06-30"
+  }
+}
+```
+
+---
+
+### `notification`: Global recall advisory
+
+```json
+{
+  "message_type": "notification",
+  "sender_id": "system:autonality.ai",
+  "receiver_id": "ALL",
+  "timestamp": "2025-05-16T11:00:00Z",
+  "notification": {
+    "type": "recall_advisory",
+    "topic": "brake_hose_inspection",
+    "models_affected": ["CUPRA Leon 2021-2022", "Golf 8 2020-2021"],
+    "source": "official_bulletin_132/2025",
+    "note": "Early signs detected by 17 agents. Recommended to inspect before summer."
+  }
+}
+```
+---
+
 ---
 
 ## 🔐 Agent Identifier Format
 
-| Identifier Type      | Format Example           | Description                            |
-|----------------------|--------------------------|----------------------------------------|
-| Vehicle agent        | `vehicle:ABC123`         | Individual vehicle                     |
-| Fleet agent          | `fleet:FLEET001`         | Represents a company or rental fleet   |
-| User agent           | `user:johndoe`           | A human user                           |
-| System/backend agent | `system:autonality.ai`   | Central coordination or orchestration  |
+Every message must include a `sender_id` and a `receiver_id` using the following structured format:
+
+| Identifier Type      | Format Example         | Description                              |
+|----------------------|------------------------|------------------------------------------|
+| Vehicle agent        | `vehicle:ABC123`       | Individual vehicle agent                 |
+| Fleet agent          | `fleet:FLEET001`       | Company-owned or managed vehicle fleet   |
+| User agent           | `user:johndoe`         | A human user agent                       |
+| System/backend agent | `system:autonality.ai` | Server, orchestrator or coordination hub |
+
+These identifiers allow messages to be routed between agents in a vendor-neutral and semantically meaningful way.
 
 ---
 
@@ -132,200 +177,3 @@ Feel free to fork this repo, open an issue, or submit a pull request.
 
 Created and maintained by [autonality.ai](https://autonality.ai)  
 For questions, suggestions or collaborations, contact: **echacon911@gmail.com**
-# Vehicle Agent Protocol – Message Specification
-
-This document provides a detailed specification of the message structure used in the Vehicle Agent Protocol (VAP).  
-It defines the required and optional fields, valid types, and how to extend the standard in a structured way.
-
----
-
-## 1. 📦 Message Overview
-
-All VAP messages are JSON objects with a standard set of top-level fields and an optional nested payload, depending on the message type.
-
----
-
-## 2. 🔑 Top-Level Fields
-
-| Key            | Type     | Required | Description                                                                 |
-|----------------|----------|----------|-----------------------------------------------------------------------------|
-| `message_id`   | string   | No       | Unique ID of the message (e.g., UUID or internal ref).                     |
-| `timestamp`    | string   | Yes      | ISO 8601 format datetime when the message was generated.                   |
-| `sender_id`    | string   | Yes      | Unique ID of the agent sending the message. Format: `vehicle:X`, `fleet:Y`, etc. |
-| `receiver_id`  | string   | Yes      | ID of the target agent. Can be another vehicle, fleet, user, or system.    |
-| `message_type` | string   | Yes      | One of: `event`, `query`, `response`, `sync_state`, `notification`.        |
-
----
-
-## 3. 🧩 Message Type Definitions
-
-### 3.1 `event`
-
-Used when an agent reports a detected condition or signal.
-
-```json
-"event": {
-  "name": "engine_noise_detected",
-  "severity": "medium",
-  "location": "engine_bay",
-  "confidence": 0.87
-}
-```
-
-| Field       | Type     | Required | Description                                       |
-|-------------|----------|----------|---------------------------------------------------|
-| `name`      | string   | Yes      | Event identifier (e.g., `brake_pad_wear`)         |
-| `severity`  | string   | No       | `low`, `medium`, `high`                           |
-| `location`  | string   | No       | Physical or logical location                      |
-| `confidence`| number   | No       | Value from 0.0 to 1.0                             |
-
----
-
-### 3.2 `query`
-
-Used when an agent requests information, suggestions, or status.
-
-```json
-"query": {
-  "type": "recommendation",
-  "topic": "maintenance_shop",
-  "location": "Zaragoza"
-}
-```
-
-| Field      | Type     | Required | Description                                            |
-|------------|----------|----------|--------------------------------------------------------|
-| `type`     | string   | Yes      | `recommendation`, `data_request`, `fleet_status`, etc.|
-| `topic`    | string   | Yes      | The subject of the query                              |
-| `location` | string   | No       | Optional context                                       |
-
----
-
-### 3.3 `response`
-
-Used to return data in response to a query.
-
-```json
-"response": {
-  "type": "recommendation",
-  "data": {
-    "name": "Bosch Service Zaragoza",
-    "rating": 4.7,
-    "last_used": "2024-12-10"
-  }
-}
-```
-
-| Field   | Type     | Required | Description                                  |
-|---------|----------|----------|----------------------------------------------|
-| `type`  | string   | Yes      | Must match the original query’s `type`       |
-| `data`  | object   | Yes      | Payload with the response                    |
-
----
-
-### 3.4 `sync_state` (reserved)
-
-This message type is **reserved for future use**, such as:
-- Sharing a vehicle's current state with a fleet backend.
-- Broadcasting contextual state to nearby agents.
-
-Structure to be defined in a future version.
-
----
-
-### 3.5 `notification` (reserved)
-
-This message type is **intended for system-wide notifications** or status messages not directed to any specific agent.
-
-Examples (future use):
-- Service downtime alert
-- Protocol version update
-- Public safety broadcast
-
-Structure to be defined in a future version.
-
----
-
-## 4. ℹ️ `metadata` Object
-
-Provides contextual information about the sending agent.
-
-```json
-"metadata": {
-  "vehicle_model": "Hyundai Ioniq 5",
-  "agent_version": "1.2.4",
-  "language": "es-ES"
-}
-```
-
-| Field           | Type     | Description                                |
-|------------------|----------|--------------------------------------------|
-| `vehicle_model`  | string   | e.g., `Toyota Corolla 2021`                |
-| `agent_version`  | string   | e.g., `1.3.2`                              |
-| `language`       | string   | Language code (e.g., `en-US`, `es-ES`)     |
-
----
-
-### 4.1 🌍 About `language` and Multilingual Support
-
-The `metadata.language` field specifies the preferred language for human-facing communication.
-
-#### ✅ Keys and Values Stay in English
-
-Even when `language` is `es-ES` or another non-English value, all **field names and enum values remain in English**. This ensures:
-
-- Global interoperability
-- Stable validation against schemas
-- Avoiding ambiguity in parsing
-
-| Element            | Language   | Example                       |
-|--------------------|------------|-------------------------------|
-| Keys / field names | English    | `event`, `query.topic`, etc.  |
-| Enum values        | English    | `"brake_pad_wear"`, `"high"`  |
-| Language metadata  | Any valid  | `"language": "es-ES"`         |
-| Generated output   | User's lang| Response in Spanish, if needed|
-
----
-
-## 5. 📚 Supported `query.type` Values
-
-| Type              | Description                                               |
-|-------------------|-----------------------------------------------------------|
-| `recommendation`  | Ask for suggestions based on experience                   |
-| `data_request`    | Request technical/vehicle data                            |
-| `fleet_status`    | Ask for status summary from a fleet agent                 |
-| `vehicle_identity`| Ask for metadata about another vehicle                    |
-| `proximity_alert` | Ask for nearby agents                                     |
-
-You are encouraged to propose more types through GitHub Issues or Pull Requests.
-
----
-
-## 6. ⚙️ Extending the Standard
-
-- Use `custom_` prefixes for any new fields.
-- Agents must ignore unknown fields to remain forward-compatible.
-- Validate messages using the official schema: [`schema/vap-message-schema.json`](../schema/vap-message-schema.json)
-
----
-
-## 7. 🧪 Message Validation
-
-Use the provided Python script to validate example messages:
-
-```bash
-python validate_message.py examples/query.json
-```
-
----
-
-## 8. 📬 Feedback & Contributions
-
-This specification is open and evolving.  
-Submit ideas, issues, or PRs at: [https://github.com/autonalityAI/vehicle-agent-standard](https://github.com/autonalityAI/vehicle-agent-standard)
-
----
-
-## 9. 📄 Changelog
-
-See [CHANGELOG.md](CHANGELOG.md) for a list of releases and updates to the standard.
