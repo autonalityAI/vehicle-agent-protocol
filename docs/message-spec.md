@@ -1,19 +1,18 @@
-# Vehicle Agent Protocol – Message Specification
+# Vehicle Agent Protocol – Message Specification (v2)
 
-This document provides a detailed specification of the message structure used in the Vehicle Agent Protocol (VAP).  
-It defines the required and optional fields, valid types, and how to extend the standard in a structured way.
+This document provides a detailed specification of the message structure used in the Vehicle Agent Protocol (VAP). It defines the required and optional fields, valid types, and how to extend the standard in a structured way.
 
 ---
 
 ## 1. 📦 Message Overview
 
-All VAP messages are JSON objects with a standard set of top-level fields and an optional nested payload, depending on the message type.
+All VAP messages are JSON objects with a standard set of top-level fields and an optional nested payload, depending on the `message_type`.
 
 ---
 
 ## 2. 🔑 Top-Level Fields
 
-| Key            | Type     | Required | Description                                                                 |
+| Key             | Type     | Required | Description                                                                 |
 |----------------|----------|----------|-----------------------------------------------------------------------------|
 | `message_id`   | string   | No       | Unique ID of the message (e.g., UUID or internal ref).                     |
 | `timestamp`    | string   | Yes      | ISO 8601 format datetime when the message was generated.                   |
@@ -23,7 +22,9 @@ All VAP messages are JSON objects with a standard set of top-level fields and an
 
 ---
 
-## 3. 🧩 Message Type Definitions
+## 3. 🪠 Message Type Definitions
+
+Each message type must include one nested object with a name matching the `message_type`. This keeps the protocol clean, extensible, and predictable.
 
 ### 3.1 `event`
 
@@ -38,15 +39,6 @@ Used when an agent reports a detected condition or signal.
 }
 ```
 
-| Field       | Type     | Required | Description                                       |
-|-------------|----------|----------|---------------------------------------------------|
-| `name`      | string   | Yes      | Event identifier (e.g., `brake_pad_wear`)         |
-| `severity`  | string   | No       | `low`, `medium`, `high`                           |
-| `location`  | string   | No       | Physical or logical location                      |
-| `confidence`| number   | No       | Value from 0.0 to 1.0                             |
-
----
-
 ### 3.2 `query`
 
 Used when an agent requests information, suggestions, or status.
@@ -55,17 +47,10 @@ Used when an agent requests information, suggestions, or status.
 "query": {
   "type": "recommendation",
   "topic": "maintenance_shop",
-  "location": "Zaragoza"
+  "location": "Zaragoza",
+  "context": "Clutch slipping when going uphill. Owner says it smells like toast."
 }
 ```
-
-| Field      | Type     | Required | Description                                            |
-|------------|----------|----------|--------------------------------------------------------|
-| `type`     | string   | Yes      | `recommendation`, `data_request`, `fleet_status`, etc.|
-| `topic`    | string   | Yes      | The subject of the query                              |
-| `location` | string   | No       | Optional context                                       |
-
----
 
 ### 3.3 `response`
 
@@ -75,17 +60,42 @@ Used to return data in response to a query.
 "response": {
   "type": "recommendation",
   "data": {
-    "name": "Bosch Service Zaragoza",
-    "rating": 4.7,
-    "last_used": "2024-12-10"
+    "name": "Taller Clutch&Go",
+    "rating": 4.9,
+    "last_used": "2025-04-08",
+    "note": "Fast, honest, didn’t treat my owner like a wallet on wheels."
   }
 }
 ```
 
-| Field   | Type     | Required | Description                                  |
-|---------|----------|----------|----------------------------------------------|
-| `type`  | string   | Yes      | Must match the original query’s `type`       |
-| `data`  | object   | Yes      | Payload with the response                    |
+### 3.4 `sync_state`
+
+Used to share current state or status between a vehicle and a system (e.g., fleet backend or nearby peers).
+
+```json
+"sync_state": {
+  "fuel_level": 36,
+  "battery_health": "good",
+  "mileage": 48720,
+  "next_inspection_due": "2025-06-30"
+}
+```
+
+Fields are flexible, but must be simple key-value pairs.
+
+### 3.5 `notification`
+
+Used for global messages or non-targeted alerts.
+
+```json
+"notification": {
+  "type": "recall_advisory",
+  "topic": "brake_hose_inspection",
+  "models_affected": ["CUPRA Leon 2021-2022", "Golf 8 2020-2021"],
+  "source": "official_bulletin_132/2025",
+  "note": "Early signs detected by 17 agents. Recommended to inspect before summer."
+}
+```
 
 ---
 
@@ -97,42 +107,19 @@ Provides contextual information about the sending agent.
 "metadata": {
   "vehicle_model": "Hyundai Ioniq 5",
   "agent_version": "1.2.4",
-  "language": "en-US"
+  "language": "es-ES"
 }
 ```
 
 | Field           | Type     | Description                                |
-|------------------|----------|--------------------------------------------|
-| `vehicle_model`  | string   | e.g., `Toyota Corolla 2021`                |
-| `agent_version`  | string   | e.g., `1.3.2`                              |
-| `language`       | string   | Language code (e.g., `en-US`, `es-ES`)     |
+|----------------|----------|--------------------------------------------|
+| `vehicle_model`| string   | e.g., `Toyota Corolla 2021`                |
+| `agent_version`| string   | e.g., `1.3.2`                              |
+| `language`     | string   | Language code (e.g., `en-US`, `es-ES`)     |
 
 ---
 
-### 4.1 🌍 About `language` and Multilingual Support
-
-The `metadata.language` field specifies the preferred language for human-facing communication.
-
-#### ✅ Keys and Values Stay in English
-
-Even when `language` is `es-ES` or another non-English value, all **field names and enum values remain in English**. This ensures:
-
-- Global interoperability
-- Stable validation against schemas
-- Avoiding ambiguity in parsing
-
-| Element            | Language   | Example                       |
-|--------------------|------------|-------------------------------|
-| Keys / field names | English    | `event`, `query.topic`, etc.  |
-| Enum values        | English    | `"brake_pad_wear"`, `"high"`  |
-| Language metadata  | Any valid  | `"language": "es-ES"`         |
-| Generated output   | User's lang| Response in Spanish, if needed|
-
----
-
-## 5. 📚 Supported `query.type` Values
-
-This table lists common supported query types. Extend freely.
+## 5. 📃 Supported `query.type` Values
 
 | Type              | Description                                               |
 |-------------------|-----------------------------------------------------------|
@@ -142,19 +129,21 @@ This table lists common supported query types. Extend freely.
 | `vehicle_identity`| Ask for metadata about another vehicle                    |
 | `proximity_alert` | Ask for nearby agents                                     |
 
+You are encouraged to propose more types via GitHub Issues or Pull Requests.
+
 ---
 
 ## 6. ⚙️ Extending the Standard
 
-- Use `custom_` prefixes for custom fields
-- Ignore unknown fields by default (agents must be tolerant)
-- Use [`schema/vap-message-schema.json`](../schema/vap-message-schema.json) for validation
+- Use `custom_` prefixes for any new fields.
+- Agents must ignore unknown fields to remain forward-compatible.
+- Validate messages using the official schema: [`schema/vap-message-schema.json`](../schema/vap-message-schema.json)
 
 ---
 
-## 7. 🧪 Message Validation
+## 7. 🤮 Message Validation
 
-Use the included Python script:
+Use the provided Python script to validate example messages:
 
 ```bash
 python validate_message.py examples/query.json
@@ -162,7 +151,12 @@ python validate_message.py examples/query.json
 
 ---
 
-## 8. 📬 Feedback & Contributions
+## 8. 📩 Feedback & Contributions
 
-The standard is open and community-driven.  
-Open an issue or PR at: [https://github.com/autonalityAI/vehicle-agent-standard](https://github.com/autonalityAI/vehicle-agent-standard)
+Submit ideas, issues, or PRs at: [https://github.com/autonalityAI/vehicle-agent-protocol](https://github.com/autonalityAI/vehicle-agent-protocol)
+
+---
+
+## 9. 📄 Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for a list of releases and updates to the standard.
