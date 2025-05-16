@@ -1,0 +1,12 @@
+{
+  "message_type": "sync_state",
+  "sender_id": "vehicle:CUPRA21-HYB",
+  "receiver_id": "fleet:FLEET02-ESP",
+  "timestamp": "2025-05-16T10:20:00Z",
+  "sync_state": {
+    "fuel_level": 36,
+    "battery_health": "good",
+    "mileage": 48720,
+    "next_inspection_due": "2025-06-30"
+  }
+}
