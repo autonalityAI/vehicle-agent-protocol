@@ -197,7 +197,7 @@ Feel free to fork this repo, open an issue, or submit a pull request.
 ## 📬 Contact
 
 Created and maintained by [autonality.ai](https://autonality.ai)  
-For questions, suggestions or collaborations, contact: **echacon911@gmail.com**
+For questions, suggestions or collaborations, contact: **x@autonality.ai**
 
 ---
 
